@@ -143,7 +143,7 @@ class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
 
     final Position position = this.index.lookup(index - 1);
     if (position != null && position.index() >= firstIndex && position.index() <= lastIndex) {
-      currentEntry = new Indexed<>(position.index() - 1, null, 0);
+      currentEntry = new Indexed<>(position.index() - 1, null, 0, -1);
       try {
         channel.position(position.position());
         memory.clear().flip();
@@ -209,17 +209,21 @@ class FileChannelJournalSegmentReader<E> implements JournalReader<E> {
   }
 
   private void readNextEntry(final long index, final int length) {
+    final int checksumPosition = memory.position();
+
     if (isChecksumInvalid(length)) {
       resetReading();
       return;
     }
+    memory.position(checksumPosition);
+    final long checksum = memory.getInt() & 0xFFFFFFFFL;
 
     // If the stored checksum equals the computed checksum, set the next entry.
     final int limit = memory.limit();
     memory.limit(memory.position() + length);
     final E entry = namespace.deserialize(memory);
     memory.limit(limit);
-    nextEntry = new Indexed<>(index, entry, length);
+    nextEntry = new Indexed<>(index, entry, length, checksum);
   }
 
   private void resetReading() {

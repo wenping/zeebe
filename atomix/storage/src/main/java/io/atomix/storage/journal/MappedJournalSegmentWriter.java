@@ -141,7 +141,7 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
     buffer.position(position + Integer.BYTES + Integer.BYTES + length);
 
     // Update the last entry with the correct index/term/length.
-    final Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
+    final Indexed<E> indexedEntry = new Indexed<>(index, entry, length, checksum);
     lastEntry = indexedEntry;
     this.index.index(lastEntry, position);
     return (Indexed<T>) indexedEntry;
@@ -198,7 +198,7 @@ class MappedJournalSegmentWriter<E> implements JournalWriter<E> {
         if (checksum == crc32.getValue()) {
           slice.rewind();
           final E entry = namespace.deserialize(slice);
-          lastEntry = new Indexed<>(nextIndex, entry, length);
+          lastEntry = new Indexed<>(nextIndex, entry, length, checksum);
           this.index.index(lastEntry, position);
           nextIndex++;
         } else {

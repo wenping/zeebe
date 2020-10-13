@@ -154,7 +154,14 @@ public final class RaftStorage {
   public int maxLogSegmentSize() {
     return maxSegmentSize;
   }
-
+  /**
+   * Returns the maximum entry size.
+   *
+   * @return The maximum entry size in bytes.
+   */
+  public int getMaxEntrySize() {
+    return maxEntrySize;
+  }
   /**
    * Returns the maximum number of entries per segment.
    *

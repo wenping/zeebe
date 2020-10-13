@@ -78,7 +78,7 @@ public class LeaderRoleTest {
         .then(
             i -> {
               final ZeebeEntry zeebeEntry = i.getArgument(0);
-              return new Indexed<>(1, zeebeEntry, 45);
+              return new Indexed<>(1, zeebeEntry, 45, -1);
             });
     when(context.getLogWriter()).thenReturn(writer);
 
@@ -136,7 +136,7 @@ public class LeaderRoleTest {
         .then(
             i -> {
               final ZeebeEntry zeebeEntry = i.getArgument(0);
-              return new Indexed<>(1, zeebeEntry, 45);
+              return new Indexed<>(1, zeebeEntry, 45, -1);
             });
 
     final ByteBuffer data = ByteBuffer.allocate(Integer.BYTES).putInt(0, 1);
@@ -388,7 +388,7 @@ public class LeaderRoleTest {
         .then(
             i -> {
               final ZeebeEntry zeebeEntry = i.getArgument(0);
-              return new Indexed<>(1, zeebeEntry, 45);
+              return new Indexed<>(1, zeebeEntry, 45, -1);
             });
 
     final ByteBuffer data = ByteBuffer.allocate(Integer.BYTES).putInt(0, 1);
@@ -433,7 +433,7 @@ public class LeaderRoleTest {
         .then(
             i -> {
               final ZeebeEntry zeebeEntry = i.getArgument(0);
-              return new Indexed<>(1, zeebeEntry, 45);
+              return new Indexed<>(1, zeebeEntry, 45, -1);
             });
 
     final ByteBuffer data = ByteBuffer.allocate(Integer.BYTES).putInt(0, 1);

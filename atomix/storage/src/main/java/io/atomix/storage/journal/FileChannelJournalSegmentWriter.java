@@ -141,7 +141,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
       channel.write(memory);
 
       // Update the last entry with the correct index/term/length.
-      final Indexed<E> indexedEntry = new Indexed<>(index, entry, length);
+      final Indexed<E> indexedEntry = new Indexed<>(index, entry, length, checksum);
       lastEntry = indexedEntry;
       this.index.index(lastEntry, (int) position);
       return (Indexed<T>) indexedEntry;
@@ -209,7 +209,7 @@ class FileChannelJournalSegmentWriter<E> implements JournalWriter<E> {
           memory.limit(memory.position() + length);
           final E entry = namespace.deserialize(memory);
           memory.limit(limit);
-          lastEntry = new Indexed<>(nextIndex, entry, length);
+          lastEntry = new Indexed<>(nextIndex, entry, length, checksum);
           this.index.index(lastEntry, (int) position);
           nextIndex++;
         } else {
