@@ -70,11 +70,7 @@ pipeline {
 
         stage('Build (Java)') {
             steps {
-                container('maven') {
-                    configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                        sh '.ci/scripts/distribution/build-java.sh'
-                    }
-                }
+                shellWithMaven('.ci/scripts/distribution/build-java.sh')
             }
         }
 
@@ -116,16 +112,12 @@ pipeline {
                             junit testResults: "**/*/TEST-go.xml", keepLongStdio: true
                         }
                     }
-                }
+               }
 
-                stage('Analyse (Java)') {
-                    steps {
-                        container('maven') {
-                            configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                                sh '.ci/scripts/distribution/analyse-java.sh'
-                            }
-                        }
-                    }
+               stage('Analyse (Java)') {
+                      steps {
+                          shellWithMaven('.ci/scripts/distribution/analyse-java.sh')
+                      }
                 }
 
                 stage('Unit (Java)') {
@@ -134,11 +126,7 @@ pipeline {
                     }
 
                     steps {
-                        container('maven') {
-                            configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                                sh '.ci/scripts/distribution/test-java.sh'
-                            }
-                        }
+                        shellWithMaven('.ci/scripts/distribution/test-java.sh')
                     }
 
                     post {
@@ -153,11 +141,7 @@ pipeline {
                     }
 
                     steps {
-                        container('maven-jdk8') {
-                            configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                                sh '.ci/scripts/distribution/test-java8.sh'
-                            }
-                        }
+                        shellWithMaven('.ci/scripts/distribution/test-java8.sh', 'jdk8')
                     }
 
                     post {
@@ -197,11 +181,7 @@ pipeline {
                             sh '.ci/scripts/docker/build.sh'
                             sh '.ci/scripts/docker/build_zeebe-hazelcast-exporter.sh'
                         }
-                        container('maven') {
-                            configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                                sh '.ci/scripts/distribution/it-java.sh'
-                            }
-                        }
+                        shellWithMaven('.ci/scripts/distribution/it-java.sh')
                     }
 
                     post {
@@ -213,11 +193,7 @@ pipeline {
 
                 stage('BPMN TCK') {
                     steps {
-                        container('maven') {
-                            configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
-                                sh '.ci/scripts/distribution/test-tck.sh'
-                            }
-                        }
+                        shellWithMaven('.ci/scripts/distribution/test-tck.sh')
                     }
 
                     post {
@@ -339,6 +315,15 @@ pipeline {
                             message: "Zeebe ${env.BRANCH_NAME} build ${currentBuild.absoluteUrl} changed status to ${currentBuild.currentResult}")
                 }
             }
+        }
+    }
+}
+
+def shellWithMaven(String shellCommand, String jdk = null) {
+    String mavenContainerName = "maven${jdk ? jdk : ''}"
+    container(mavenContainerName) {
+        configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
+            sh shellCommand
         }
     }
 }
