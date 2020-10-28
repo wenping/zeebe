@@ -44,27 +44,7 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                script {
-                    commit_summary = sh([returnStdout: true, script: 'git show -s --format=%s']).trim()
-                    displayNameFull = "#" + BUILD_NUMBER + ': ' + commit_summary
-
-                    if (displayNameFull.length() <= 45) {
-                        currentBuild.displayName = displayNameFull
-                    } else {
-                        displayStringHardTruncate = displayNameFull.take(45)
-                        currentBuild.displayName = displayStringHardTruncate.take(displayStringHardTruncate.lastIndexOf(" "))
-                    }
-                }
-                container('maven') {
-                    sh '.ci/scripts/distribution/prepare.sh'
-                }
-                container('maven-jdk8') {
-                    sh '.ci/scripts/distribution/prepare.sh'
-                }
-                container('golang') {
-                    sh '.ci/scripts/distribution/prepare-go.sh'
-                }
-
+                doPrepare()
             }
         }
 
@@ -325,5 +305,28 @@ def shellWithMaven(String shellCommand, String jdk = null) {
         configFileProvider([configFile(fileId: 'maven-nexus-settings-zeebe', variable: 'MAVEN_SETTINGS_XML')]) {
             sh shellCommand
         }
+    }
+}
+
+def doPrepare() {
+    script {
+        commit_summary = sh([returnStdout: true, script: 'git show -s --format=%s']).trim()
+        displayNameFull = "#${env.BUILD_NUMBER}: ${commit_summary}"
+
+        if (displayNameFull.length() <= 45) {
+            currentBuild.displayName = displayNameFull
+        } else {
+            displayStringHardTruncate = displayNameFull.take(45)
+            currentBuild.displayName = displayStringHardTruncate.take(displayStringHardTruncate.lastIndexOf(' '))
+        }
+    }
+    container('maven') {
+        sh '.ci/scripts/distribution/prepare.sh'
+    }
+    container('maven-jdk8') {
+        sh '.ci/scripts/distribution/prepare.sh'
+    }
+    container('golang') {
+        sh '.ci/scripts/distribution/prepare-go.sh'
     }
 }
