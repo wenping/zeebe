@@ -290,10 +290,7 @@ pipeline {
                     return
                 }
 
-                echo "Send slack message"
-                slackSend(
-                        channel: "#zeebe-ci${jenkins.model.JenkinsLocationConfiguration.get()?.getUrl()?.contains('stage') ? '-stage' : ''}",
-                        message: "Zeebe ${env.BRANCH_NAME} build ${currentBuild.absoluteUrl} changed status to ${currentBuild.currentResult}")
+                sendZeebeSlackMessage()
             }
         }
         changed {
@@ -304,13 +301,11 @@ pipeline {
                 if (currentBuild.currentResult == 'FAILURE') {
                     return // already handled above
                 }
-
-                if (hasBuildResultChanged()) {
-                    echo "Send slack message"
-                    slackSend(
-                            channel: "#zeebe-ci${jenkins.model.JenkinsLocationConfiguration.get()?.getUrl()?.contains('stage') ? '-stage' : ''}",
-                            message: "Zeebe ${env.BRANCH_NAME} build ${currentBuild.absoluteUrl} changed status to ${currentBuild.currentResult}")
+                if (!hasBuildResultChanged()) {
+                    return
                 }
+
+                sendZeebeSlackMessage()
             }
         }
     }
@@ -325,4 +320,12 @@ def runMavenContainerCommand(String shellCommand, String jdk = null) {
             sh shellCommand
         }
     }
+}
+
+// TODO: can be extracted to zeebe-jenkins-shared-library
+def sendZeebeSlackMessage() {
+    echo "Send slack message"
+    slackSend(
+        channel: "#zeebe-ci${jenkins.model.JenkinsLocationConfiguration.get()?.getUrl()?.contains('stage') ? '-stage' : ''}",
+        message: "Zeebe ${env.BRANCH_NAME} build ${currentBuild.absoluteUrl} changed status to ${currentBuild.currentResult}")
 }
