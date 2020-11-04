@@ -54,7 +54,7 @@ public final class ReprocessingIssueDetectionMultiplePartitionTest {
 
   @Before
   public void setup() {
-    // avoid that a deployment DISTRIBUTED event is written
+    // avoid that a deployment is distributed
     deploymentDistributorMock.pushDeploymentCallback = CompletableActorFuture::new;
 
     engine
@@ -83,8 +83,7 @@ public final class ReprocessingIssueDetectionMultiplePartitionTest {
   @Test
   public void shouldIgnoreDeploymentDistribution() {
     // given
-    // force that a deployment DISTRIBUTED event is written on reprocessing which was not written on
-    // the log stream before
+    // the deployment can be distributed on reprocessing
     deploymentDistributorMock.pushDeploymentCallback = () -> CompletableActorFuture.completed(null);
 
     engine.writeRecords(
