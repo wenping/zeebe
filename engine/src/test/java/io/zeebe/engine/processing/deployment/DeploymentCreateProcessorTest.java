@@ -53,7 +53,7 @@ public final class DeploymentCreateProcessorTest {
   }
 
   @Test
-  public void shouldRejectTwoCreatingCommands() {
+  public void shouldNotRejectTwoCreateDeploymentCommands() {
     // given
     creatingDeployment();
 
